@@ -32,7 +32,7 @@ body {
   color: white;
   font-size: 52px;
   transform: rotate(1deg);
-  text-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+  text-shadow: 5px 5px 20px rgba(0, 0, 0, 0.8);
 }
 
 #entry-form {
@@ -45,25 +45,24 @@ body {
 }
 
 #input-name {
-  width: 60%;
+  width: 40%;
   border: 0;
   padding: 5px 8px;
   outline: none;
   background: none;
-  border: 1px solid white;
-  color: white;
+  border-bottom: 1px solid white;
   text-align: center;
   font-family: 'Carter One', cursive;
-  border-radius: 5px;
-  /*box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);*/
-  text-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
+  color: #ffffff;
+  box-shadow: 0px 4px 4px -4px rgba(0, 0, 0, 0.8);
 }
 
 #button-enter {
   margin-top: 4%;
   width: 60%;
   height: 30%;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.5);
   font-size: 12px;
   color: #151520;
   display: flex;
@@ -71,7 +70,7 @@ body {
   align-items: center;
   transition: 0.2s ease-in-out;
   border-radius: 5px;
-  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.8);
 }
 
 #button-enter:hover {
