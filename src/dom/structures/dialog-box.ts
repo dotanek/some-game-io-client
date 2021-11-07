@@ -5,9 +5,9 @@ import { DOMEvent } from '../enums/dom-event.enum';
 
 export class DialogBox {
   private readonly dialog: HTMLElement;
-  private readonly form: HTMLLIElement;
+  private readonly form: HTMLFormElement;
   private readonly input: HTMLInputElement;
-  private readonly button: HTMLElement;
+  private readonly button: HTMLButtonElement;
 
   constructor(private readonly application: Application) {
     const form = document.getElementById(DOMElement.FORM);
@@ -31,9 +31,9 @@ export class DialogBox {
       throw new Error(`DOM element '${DOMElement.DIALOG}' not found.`);
     }
 
-    this.form = form as HTMLLIElement;
+    this.form = form as HTMLFormElement;
     this.input = input as HTMLInputElement;
-    this.button = button as HTMLLIElement;
+    this.button = button as HTMLButtonElement;
     this.dialog = dialog as HTMLElement;
 
     this.initListeners();
@@ -41,16 +41,27 @@ export class DialogBox {
 
   private initListeners(): void {
     this.input.addEventListener(DOMEvent.FOCUS, () => this.handleFocusInputName());
-    this.button.addEventListener(DOMEvent.CLICK, () => this.handleClickButtonEnter());
+    this.input.addEventListener(DOMEvent.CHANGE, () => this.handleChangeInputName());
+    this.button.addEventListener(DOMEvent.CLICK, (event) => this.handleClickButtonEnter(event));
   }
 
   private handleFocusInputName(): void {
-    console.log('Focus!');
+    this.resetFormColor();
+  }
+
+  private handleChangeInputName(): void {
+    console.log('Change!');
+    this.resetFormColor();
+  }
+
+  private resetFormColor(): void {
     this.input.style.borderBottom = '1px solid white';
     this.input.style.color = '#ffffff';
   }
 
-  private handleClickButtonEnter(): void {
+  private handleClickButtonEnter(event: any): void {
+    event.preventDefault();
+
     const username = this.input.value;
 
     if (username === '') {
