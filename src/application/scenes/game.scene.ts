@@ -3,8 +3,9 @@ import textureBackground from '../../assets/textures/mock-background.jpg';
 import * as Phaser from 'phaser';
 import { Entity } from '../../game/structures/entity';
 import { EntityFactory } from '../../game/factories/entity.factory';
-import { averageAngles } from '../../common/helpers/math.helper';
-import Between = Phaser.Math.Angle.Between;
+import Vector2 = Phaser.Math.Vector2;
+
+const entityFactory = new EntityFactory();
 
 export class GameScene extends Phaser.Scene {
   private playerEntity!: Entity;
@@ -15,24 +16,30 @@ export class GameScene extends Phaser.Scene {
   }
 
   public create(): void {
-    this.playerEntity = new EntityFactory().createNewPlayerEntity(this, config.world.width / 2, config.world.height / 2);
+    this.playerEntity = entityFactory.createNewPlayerEntity(this, config.world.width / 2, config.world.height / 2);
     this.otherEntites = [];
 
     this.physics.world.setBounds(0, 0, config.world.width, config.world.height);
     this.createBackground();
 
-    if (config.debugMode) {
+    if (!config.debugMode) {
       this.createGrid();
     }
 
     this.spawnPlayer();
-    this.playerEntity.getBody().setVelocity(-1,-1);
-    //this.spawnOtherPlayers();
+    this.playerEntity.getBody().setVelocity(1,1);
+    this.spawnOtherPlayers();
     this.setUpCamera();
   }
 
   public update() {
-    const centerX = config.window.width / 2;
+    const center = new Vector2(config.window.width / 2, config.window.height / 2);
+    const mouse = new Vector2(this.input.x, this.input.y);
+
+    const velocity = new Vector2( (mouse.x - center.x), (mouse.y - center.y));
+    this.playerEntity.getBody().setVelocity(velocity.x, velocity.y);
+
+    /*const centerX = config.window.width / 2;
     const centerY = config.window.height / 2;
 
     const mouseX = this.input.x;
@@ -41,18 +48,19 @@ export class GameScene extends Phaser.Scene {
     const velX = this.playerEntity.getBody().velocity.x;
     const velY = this.playerEntity.getBody().velocity.y;
 
-    const mouseAngle = Between(centerX, centerY, mouseX, mouseY) * 180 / Math.PI;
-    const velAngle = Between(0, 0, velX, velY) * 180 / Math.PI;
-    const accAngle = averageAngles(mouseAngle, velAngle);
+    const [normVelX, normVelY] = normalizeDirectionVector(velX,velY);
+    const [normMouseX, normMouseY] = normalizeDirectionVector((mouseX-centerX)/2,(mouseY-centerY)/2);
 
-    console.log(`Mouse angle: ${mouseAngle}\nVelocity angle: ${velAngle}\naccAngle: ${accAngle}`);
-    //const maxAcc = config.entity.maxAcceleration;
+    const maxAcc = config.entity.maxAcceleration;
 
-    //const accX = Math.cos(accAngle) * maxAcc;
-    //const accY = Math.sin(accAngle) * maxAcc;
+    const accX = (normMouseX*1.1 - normVelX) * maxAcc;
+    const accY = (normMouseY*1.1 - normVelY) * maxAcc;
 
-    //this.playerEntity.getBody().setAcceleration(accX, accY);
-    this.updateCamera();
+    this.playerEntity.getBody().setAcceleration(accX,accY);*/
+
+    this.playerEntity.update();
+    this.otherEntites.forEach(entity => entity.update());
+    //this.updateCamera();
   }
 
   private spawnPlayer(): void {
@@ -63,24 +71,21 @@ export class GameScene extends Phaser.Scene {
 
   private spawnOtherPlayers(): void {
     for (let i = 0; i < 20; i++) {
-      const mass = Math.random() * 5000;
+      const mass = config.entity.minMass +  Math.random() * (config.entity.massVelocityCapacity - config.entity.minMass);
       const radius = Entity.convertMassToRadius(mass);
-      const entity = new Entity(
-        this,
-        Math.random() * config.world.width - radius * 2,
-        Math.random() * config.world.height - radius * 2,
-        mass,
-      );
+      const x = Math.random() * config.world.width - radius * 2;
+      const y = Math.random() * config.world.height - radius * 2;
+      const entity = entityFactory.createOtherPlayerEntity(this, x, y, mass);
       entity.addToScene();
       entity.addToScenePhysic();
       entity.getBody().setVelocity(Math.random() * 100, Math.random() * 100);
       entity.getBody().setCollideWorldBounds(true, 1, 1);
-      entity.setFillStyle(0xffeeee, 1);
       entity.getBody().setBounce(1, 1);
+
       this.otherEntites.forEach((otherEntity) => {
         Entity.addEntityToEntityCollision(entity, otherEntity, this);
       });
-      Entity.addPlayerEntityToEntityCollision(this.playerEntity, entity, this, this.otherEntites);
+      Entity.addPlayerEntityToEntityCollision(this.playerEntity, entity, this);
       this.otherEntites.push(entity);
     }
   }
@@ -99,9 +104,10 @@ export class GameScene extends Phaser.Scene {
 
   private setUpCamera(): void {
     this.cameras.main.startFollow(this.playerEntity);
+    this.updateCameraZoom();
   }
 
-  private updateCamera(): void {
+  private updateCameraZoom(): void {
     const viewHeight = 2 * this.playerEntity.radius * config.camera.entityToViewRatio;
     const zoom = config.window.height / viewHeight;
     this.cameras.main.setZoom(zoom, zoom);

@@ -1,5 +1,5 @@
 export default {
-  debugMode: true,
+  debugMode: false,
   window: {
     width: 1920,
     height: 1080,
@@ -15,11 +15,10 @@ export default {
     maxAcceleration: 1000,
     minMass: 100,
     minVelocity: 100, // Minimal top velocity for the biggest entity.
-    maxVelocity: 10000,
+    maxVelocity: 1000,
     massVelocityCapacity: 100000, // Above this mass, velocity remains constant.
   },
   camera: {
-    minZoom: 1,
-    entityToViewRatio: 30
+    entityToViewRatio: 50
   }
 };
