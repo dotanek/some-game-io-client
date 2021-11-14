@@ -103,7 +103,9 @@ export class Entity extends Arc {
   }
 
   public static addEntityToEntityCollision(first: Entity, second: Entity, scene: Scene) {
-    scene.physics.add.collider(first, second, () => console.log('Entity to entity collision.'));
+    scene.physics.add.collider(first, second, () => {
+      //console.log('Entity to entity collision.');
+    });
   }
 }
 

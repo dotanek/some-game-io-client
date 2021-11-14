@@ -20,5 +20,8 @@ export default {
   },
   camera: {
     entityToViewRatio: 50
+  },
+  socket: {
+    server: 'http://localhost:5000'
   }
 };

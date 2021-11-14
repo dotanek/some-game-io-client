@@ -71,7 +71,7 @@ export class DialogBox {
     }
 
     this.setVisibility(false);
-    this.application.connect(username);
+    this.application.joinGame(username);
   }
 
   private setVisibility(value: boolean) {
