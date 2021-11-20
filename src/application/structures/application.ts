@@ -47,11 +47,17 @@ export class Application {
   }
 
   private initListeners(): void {
+    // Connection
     this.socket.on(SocketEvent.CONNECT, () => {
       console.log(`Connected with id '${this.socket.id}'.`);
     });
     this.socket.on(SocketEvent.DISCONNECT, () => {
       console.log(`Disconnected.`);
+    });
+
+    // Game
+    this.socket.on(SocketEvent.GAME_UPDATE, (message: string) => {
+      console.log(message);
     });
   }
 }
