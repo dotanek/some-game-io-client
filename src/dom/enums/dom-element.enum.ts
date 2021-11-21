@@ -4,4 +4,5 @@ export enum DOMElement {
   FORM = 'entry-form',
   DIALOG = 'dialog-box',
   GAME = 'game',
+  SPINNER = 'spinner',
 }

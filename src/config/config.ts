@@ -5,8 +5,8 @@ export default {
     height: 1080,
   },
   world: {
-    width: 10000,
-    height: 10000,
+    width: 1000,
+    height: 1000,
   },
   styles: {
     backgroundColor: '0B1F47',

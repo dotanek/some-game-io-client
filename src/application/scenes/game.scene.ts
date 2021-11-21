@@ -2,10 +2,8 @@ import config from '../../config/config';
 import textureBackground from '../../assets/textures/mock-background.jpg';
 import * as Phaser from 'phaser';
 import { Entity } from '../../game/structures/entity';
-import { EntityFactory } from '../../game/factories/entity.factory';
 import Vector2 = Phaser.Math.Vector2;
-
-const entityFactory = new EntityFactory();
+import { EntityFactory } from '../../game/factories/entity.factory';
 
 export class GameScene extends Phaser.Scene {
   private playerEntity!: Entity;
@@ -16,9 +14,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   public create(): void {
-    this.playerEntity = entityFactory.createNewPlayerEntity(this, config.world.width / 2, config.world.height / 2);
-    this.otherEntites = [];
-
     this.physics.world.setBounds(0, 0, config.world.width, config.world.height);
     this.createBackground();
 
@@ -26,8 +21,10 @@ export class GameScene extends Phaser.Scene {
       this.createGrid();
     }
 
+    this.playerEntity = EntityFactory.createNewPlayerEntity(this, config.world.width / 2, config.world.height / 2);
+    this.otherEntites = [];
+
     this.spawnPlayer();
-    this.playerEntity.getBody().setVelocity(1,1);
     this.spawnOtherPlayers();
     this.setUpCamera();
   }
@@ -36,8 +33,11 @@ export class GameScene extends Phaser.Scene {
     const center = new Vector2(config.window.width / 2, config.window.height / 2);
     const mouse = new Vector2(this.input.x, this.input.y);
 
-    const velocity = new Vector2( (mouse.x - center.x), (mouse.y - center.y));
+    const velocity = new Vector2(mouse.x - center.x, mouse.y - center.y);
     this.playerEntity.getBody().setVelocity(velocity.x, velocity.y);
+
+    this.playerEntity.update();
+    this.otherEntites.forEach((entity) => entity.update());
 
     /*const centerX = config.window.width / 2;
     const centerY = config.window.height / 2;
@@ -57,9 +57,6 @@ export class GameScene extends Phaser.Scene {
     const accY = (normMouseY*1.1 - normVelY) * maxAcc;
 
     this.playerEntity.getBody().setAcceleration(accX,accY);*/
-
-    this.playerEntity.update();
-    this.otherEntites.forEach(entity => entity.update());
     //this.updateCamera();
   }
 
@@ -70,29 +67,58 @@ export class GameScene extends Phaser.Scene {
   }
 
   private spawnOtherPlayers(): void {
-    for (let i = 0; i < 20; i++) {
-      const mass = config.entity.minMass +  Math.random() * (config.entity.massVelocityCapacity - config.entity.minMass);
-      const radius = Entity.convertMassToRadius(mass);
-      const x = Math.random() * config.world.width - radius * 2;
-      const y = Math.random() * config.world.height - radius * 2;
-      const entity = entityFactory.createOtherPlayerEntity(this, x, y, mass);
+    this.otherEntites.forEach((entity) => {
       entity.addToScene();
       entity.addToScenePhysic();
-      entity.getBody().setVelocity(Math.random() * 100, Math.random() * 100);
-      entity.getBody().setCollideWorldBounds(true, 1, 1);
-      entity.getBody().setBounce(1, 1);
+    });
 
-      this.otherEntites.forEach((otherEntity) => {
-        Entity.addEntityToEntityCollision(entity, otherEntity, this);
-      });
-      Entity.addPlayerEntityToEntityCollision(this.playerEntity, entity, this);
-      this.otherEntites.push(entity);
-    }
+    /*for (let i = 0; i < 20; i++) {
+    const mass = config.entity.minMass + Math.random() * (config.entity.massVelocityCapacity - config.entity.minMass);
+    const radius = Entity.convertMassToRadius(mass);
+    const x = Math.random() * config.world.width - radius * 2;
+    const y = Math.random() * config.world.height - radius * 2;
+    const entity = entityFactory.createOtherPlayerEntity(this, x, y, mass);
+    entity.addToScene();
+    entity.addToScenePhysic();
+    entity.getBody().setVelocity(Math.random() * 100, Math.random() * 100);
+    entity.getBody().setCollideWorldBounds(true, 1, 1);
+    entity.getBody().setBounce(1, 1);
+
+    this.otherEntites.forEach((otherEntity) => {
+      Entity.addEntityToEntityCollision(entity, otherEntity, this);
+    });
+    Entity.addPlayerEntityToEntityCollision(this.playerEntity, entity, this);
+    this.otherEntites.push(entity);
+  }*/
+  }
+
+  public getPlayerEntity(): Entity {
+    return this.playerEntity;
+  }
+
+  public getOtherEntities(): Entity[] {
+    return this.otherEntites;
+  }
+
+  private removeOtherPlayers(): void {
+    this.otherEntites.forEach(entity => {
+      entity.remove();
+    });
+
+    this.otherEntites = [];
+  }
+
+  public setOtherPlayers(entities: Entity[]): void {
+    this.removeOtherPlayers();
+    this.otherEntites = entities;
+  }
+
+  public setPlayer(entity: Entity): void {
+    this.playerEntity = entity;
   }
 
   private createBackground(): void {
     this.cameras.main.setBackgroundColor(config.styles.backgroundColor);
-    //this.add.rectangle(config.world.width / 2, config.world.height / 2, config.world.width, config.world.height, 0x80cccc,1).setOrigin(0.5, 0.5);
   }
 
   private createGrid(): void {

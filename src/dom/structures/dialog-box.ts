@@ -4,16 +4,18 @@ import { DOMElement } from '../enums/dom-element.enum';
 import { DOMEvent } from '../enums/dom-event.enum';
 
 export class DialogBox {
-  private readonly dialog: HTMLElement;
+  private readonly dialog: HTMLDivElement;
   private readonly form: HTMLFormElement;
   private readonly input: HTMLInputElement;
   private readonly button: HTMLButtonElement;
+  private readonly spinner: HTMLDivElement;
 
   constructor(private readonly application: Application) {
     const form = document.getElementById(DOMElement.FORM);
     const input = document.getElementById(DOMElement.INPUT);
     const button = document.getElementById(DOMElement.BUTTON);
     const dialog = document.getElementById(DOMElement.DIALOG);
+    const spinner = document.getElementById(DOMElement.SPINNER);
 
     if (!form) {
       throw new Error(`DOM element '${DOMElement.FORM}' not found.`);
@@ -31,10 +33,15 @@ export class DialogBox {
       throw new Error(`DOM element '${DOMElement.DIALOG}' not found.`);
     }
 
+    if (!spinner) {
+      throw new Error(`DOM element '${DOMElement.SPINNER}' not found.`);
+    }
+
     this.form = form as HTMLFormElement;
     this.input = input as HTMLInputElement;
     this.button = button as HTMLButtonElement;
-    this.dialog = dialog as HTMLElement;
+    this.dialog = dialog as HTMLDivElement;
+    this.spinner = spinner as HTMLDivElement;
 
     this.initListeners();
   }
@@ -50,7 +57,6 @@ export class DialogBox {
   }
 
   private handleChangeInputName(): void {
-    console.log('Change!');
     this.resetFormColor();
   }
 
@@ -71,10 +77,15 @@ export class DialogBox {
     }
 
     this.setVisibility(false);
+    this.setSpinnerVisibility(true);
     this.application.joinGame(username);
   }
 
-  private setVisibility(value: boolean) {
+  public setVisibility(value: boolean) {
     this.dialog.style.display = value ? DOMDisplay.FLEX : DOMDisplay.NONE;
+  }
+
+  public setSpinnerVisibility(value: boolean) {
+    this.spinner.style.display = value ? DOMDisplay.FLEX : DOMDisplay.NONE;
   }
 }

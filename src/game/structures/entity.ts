@@ -18,7 +18,7 @@ export class Entity extends Arc {
 
   public addToScene(): void {
     this.scene.add.existing(this);
-    this.healthBar.addToScene();
+    //this.healthBar.addToScene();
   }
 
   public addToScenePhysic(): void {
@@ -27,6 +27,11 @@ export class Entity extends Arc {
     body.setCircle(Entity.convertMassToRadius(this.mass));
     body.setMaxVelocity(config.entity.maxVelocity, config.entity.maxVelocity);
     body.setMass(this.mass);
+  }
+
+  public remove(): void {
+    this.healthBar.remove();
+    this.destroy();
   }
 
   public update(): void {
@@ -134,5 +139,10 @@ class HealthBar extends Rectangle {
   public addToScene(): void {
     this.scene.add.existing(this);
     this.scene.add.existing(this.innerBar);
+  }
+
+  public remove(): void {
+    this.innerBar.destroy();
+    this.destroy();
   }
 }
