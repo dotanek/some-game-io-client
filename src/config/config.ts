@@ -22,6 +22,7 @@ export default {
     entityToViewRatio: 50
   },
   socket: {
-    server: 'http://localhost:5000'
+    server: 'http://localhost:5000',
+    updateRate: 50
   }
 };

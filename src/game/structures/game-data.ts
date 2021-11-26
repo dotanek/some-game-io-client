@@ -3,10 +3,19 @@ import { GameScene } from '../../application/scenes/game.scene';
 import { SocketEvent } from '../../application/enums/socket-event.enum';
 import { EntityDataModel, ServerDataModel } from '../models/server-data.model';
 import { EntityFactory } from '../factories/entity.factory';
+import config from '../../config/config';
 
 export class GameData {
+  private updateInterval: number;
+
   constructor(private readonly socket: Socket, private readonly gameScene: GameScene, private readonly username: string) {
     this.initializeListeners();
+
+    this.updateInterval = setInterval(this.emitPlayerUpdate.bind(this), config.socket.updateRate);
+  }
+
+  public remove(): void {
+    clearInterval(this.updateInterval);
   }
 
   private initializeListeners(): void {
@@ -14,10 +23,9 @@ export class GameData {
   }
 
   private handleGameUpdate(data: ServerDataModel): void {
-    this.emitPlayerUpdate();
-
     let playerEntityData;
     const otherEntitiesData = [] as EntityDataModel[];
+    console.log(data);
 
     data.entities.forEach((entityData) => {
       if (entityData.name === this.username) {
@@ -36,7 +44,6 @@ export class GameData {
       entity.addToScene();
       entity.addToScenePhysic();
       entity.getBody().setVelocity(entityData.velocity.x, entityData.velocity.y);
-      entity.getBody().setAcceleration(entityData.acceleration.x, entityData.acceleration.y);
       entity.getBody().setCollideWorldBounds(true);
 
       return entity;

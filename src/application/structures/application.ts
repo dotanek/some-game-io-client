@@ -37,6 +37,13 @@ export class Application {
     });
   }
 
+  public leaveGame(): void {
+    this.activeGameData?.remove();
+    this.activeGameData = undefined;
+
+    this.changeScene(SceneType.ENTRY);
+  }
+
   private changeScene(scene: SceneType) {
     if (this.activeScene) {
       this.game.scene.switch(this.activeScene, scene);
@@ -55,22 +62,17 @@ export class Application {
   private initListeners(): void {
     // Connection
     this.socket.on(SocketEvent.CONNECT, () => {
-
-      // TODO ARTIFICIAL DELAY REMOVE LATER
-      setTimeout(() => {
-        this.dialogBox.setSpinnerVisibility(false);
-        this.dialogBox.setVisibility(true);
-      }, 1000);
-
+      this.dialogBox.setSpinnerVisibility(false);
+      this.dialogBox.setVisibility(true);
       console.log(`Connected with id '${this.socket.id}'.`);
     });
     this.socket.on(SocketEvent.DISCONNECT, () => {
-      console.log(`Disconnected.`);
+      this.changeScene(SceneType.ENTRY);
+      this.dialogBox.setSpinnerVisibility(true);
     });
-
-    /*// Game
-    this.socket.on(SocketEvent.GAME_UPDATE, (message: string) => {
-      console.log(message);
-    });*/
+    this.socket.on(SocketEvent.ERROR, (error: string) => {
+      this.leaveGame();
+      console.error(error);
+    });
   }
 }
