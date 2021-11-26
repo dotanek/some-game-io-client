@@ -5,6 +5,8 @@ export class EntryScene extends Scene {
   public create(): void {
     this.cameras.main.setBackgroundColor(config.styles.backgroundColor);
     this.generateAmbienceBalls(10);
+
+    console.log('created!');
   }
 
   private generateAmbienceBalls(amount: number) {

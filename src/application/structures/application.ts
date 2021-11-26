@@ -40,8 +40,6 @@ export class Application {
   public leaveGame(): void {
     this.activeGameData?.remove();
     this.activeGameData = undefined;
-
-    this.changeScene(SceneType.ENTRY);
   }
 
   private changeScene(scene: SceneType) {
@@ -67,11 +65,18 @@ export class Application {
       console.log(`Connected with id '${this.socket.id}'.`);
     });
     this.socket.on(SocketEvent.DISCONNECT, () => {
-      this.changeScene(SceneType.ENTRY);
+      if (this.activeScene === SceneType.GAME) {
+        this.leaveGame();
+        this.changeScene(SceneType.ENTRY);
+      } else {
+        this.dialogBox.setVisibility(false);
+      }
+
       this.dialogBox.setSpinnerVisibility(true);
     });
     this.socket.on(SocketEvent.ERROR, (error: string) => {
       this.leaveGame();
+      this.changeScene(SceneType.ENTRY);
       console.error(error);
     });
   }

@@ -3,21 +3,26 @@ import * as Phaser from 'phaser';
 import Arc = Phaser.GameObjects.Arc;
 import config from '../../config/config';
 import Rectangle = Phaser.GameObjects.Rectangle;
+import { EntityDataModel } from '../models/server-data.model';
 
 export class Entity extends Arc {
   private readonly healthBar: HealthBar;
   private mass: number;
+  private text?: Phaser.GameObjects.Text;
+  private readonly username: string;
 
-  constructor(scene: Scene, x: number, y: number, mass: number) {
+  constructor(scene: Scene, x: number, y: number, mass: number, username: string) {
     const radius = Entity.convertMassToRadius(mass);
     super(scene, x, y, radius);
 
+    this.username = username;
     this.healthBar = new HealthBar(scene, x + radius, y - radius / 2, radius * 4, radius, mass);
     this.mass = mass;
   }
 
   public addToScene(): void {
     this.scene.add.existing(this);
+    this.text = this.scene.add.text(0, 0, this.username).setOrigin(0.45, 0.5);
     //this.healthBar.addToScene();
   }
 
@@ -27,10 +32,14 @@ export class Entity extends Arc {
     body.setCircle(Entity.convertMassToRadius(this.mass));
     body.setMaxVelocity(config.entity.maxVelocity, config.entity.maxVelocity);
     body.setMass(this.mass);
+    body.setCollideWorldBounds(true);
   }
 
   public remove(): void {
     this.healthBar.remove();
+
+    this.text?.destroy();
+
     this.destroy();
   }
 
@@ -39,6 +48,8 @@ export class Entity extends Arc {
 
     this.healthBar.setPosition(position.x + this.radius, position.y - this.radius);
     this.healthBar.update();
+
+    this.text?.setPosition(position.x, position.y - 10);
   }
 
   public getX(): number {
@@ -58,8 +69,9 @@ export class Entity extends Arc {
   }
 
   public zeroAcceleration(): void {
-    this.getBody().setAcceleration(0,0);
+    this.getBody().setAcceleration(0, 0);
     console.log(this.getBody());
+    console.log('a');
   }
 
   public addToMassAndUpdateSize(value: number): void {
@@ -72,6 +84,20 @@ export class Entity extends Arc {
     this.updateSize();
   }
 
+  public updateWithData(entityData: EntityDataModel) {
+    const body = this.getBody();
+    const { position, velocity, mass } = entityData;
+
+    body.position.x = position.x;
+    body.position.y = position.y;
+
+    this.setPosition(position.x, position.y);
+    body.setVelocity(velocity.x, velocity.y);
+
+    this.mass = mass;
+    this.updateSize();
+  }
+
   private updateSize(): void {
     this.radius = Entity.convertMassToRadius(this.mass);
     const maxVelocity = Entity.convertMassToMaxVelocity(this.mass);
@@ -80,9 +106,6 @@ export class Entity extends Arc {
     body.setCircle(Entity.convertMassToRadius(this.mass));
     body.setMaxVelocity(maxVelocity, maxVelocity);
     body.setMass(this.mass);
-
-    console.log(`New mass: ${this.mass}`);
-    console.log(`New max velocity: ${this.getBody().maxVelocity.x}, ${this.getBody().maxVelocity.y}`);
   }
 
   public static convertMassToRadius(mass: number) {

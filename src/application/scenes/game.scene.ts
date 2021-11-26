@@ -7,7 +7,8 @@ import { EntityFactory } from '../../game/factories/entity.factory';
 
 export class GameScene extends Phaser.Scene {
   private playerEntity!: Entity;
-  private otherEntites!: Entity[];
+  private otherEntites!: Record<string, Entity>;
+  private created = false;
 
   public preload(): void {
     this.load.image('background', textureBackground);
@@ -21,12 +22,14 @@ export class GameScene extends Phaser.Scene {
       this.createGrid();
     }
 
-    this.playerEntity = EntityFactory.createNewPlayerEntity(this, config.world.width / 2, config.world.height / 2);
-    this.otherEntites = [];
+    this.playerEntity = EntityFactory.createNewPlayerEntity(this, config.world.width / 2, config.world.height / 2, '');
+    this.otherEntites = {};
 
     this.spawnPlayer();
     this.spawnOtherPlayers();
     this.setUpCamera();
+
+    this.created = true;
   }
 
   public update() {
@@ -37,7 +40,7 @@ export class GameScene extends Phaser.Scene {
     this.playerEntity.getBody().setVelocity(velocity.x, velocity.y);
 
     this.playerEntity.update();
-    this.otherEntites.forEach((entity) => entity.update());
+    this.getOtherEntitiesArray().forEach((entity) => entity.update());
 
     /*const centerX = config.window.width / 2;
     const centerY = config.window.height / 2;
@@ -67,54 +70,38 @@ export class GameScene extends Phaser.Scene {
   }
 
   private spawnOtherPlayers(): void {
-    this.otherEntites.forEach((entity) => {
+    this.getOtherEntitiesArray().forEach((entity) => {
       entity.addToScene();
       entity.addToScenePhysic();
     });
-
-    /*for (let i = 0; i < 20; i++) {
-    const mass = config.entity.minMass + Math.random() * (config.entity.massVelocityCapacity - config.entity.minMass);
-    const radius = Entity.convertMassToRadius(mass);
-    const x = Math.random() * config.world.width - radius * 2;
-    const y = Math.random() * config.world.height - radius * 2;
-    const entity = entityFactory.createOtherPlayerEntity(this, x, y, mass);
-    entity.addToScene();
-    entity.addToScenePhysic();
-    entity.getBody().setVelocity(Math.random() * 100, Math.random() * 100);
-    entity.getBody().setCollideWorldBounds(true, 1, 1);
-    entity.getBody().setBounce(1, 1);
-
-    this.otherEntites.forEach((otherEntity) => {
-      Entity.addEntityToEntityCollision(entity, otherEntity, this);
-    });
-    Entity.addPlayerEntityToEntityCollision(this.playerEntity, entity, this);
-    this.otherEntites.push(entity);
-  }*/
   }
 
   public getPlayerEntity(): Entity {
     return this.playerEntity;
   }
 
-  public getOtherEntities(): Entity[] {
+  public getOtherEntities(): Record<string, Entity> {
     return this.otherEntites;
-  }
-
-  private removeOtherPlayers(): void {
-    this.otherEntites.forEach(entity => {
-      entity.remove();
-    });
-
-    this.otherEntites = [];
-  }
-
-  public setOtherPlayers(entities: Entity[]): void {
-    this.removeOtherPlayers();
-    this.otherEntites = entities;
   }
 
   public setPlayer(entity: Entity): void {
     this.playerEntity = entity;
+  }
+
+  public replaceOtherEntities(otherEntites: Record<string, Entity>): void {
+    this.getOtherEntitiesArray().forEach((entity) => {
+      entity.remove();
+    });
+
+    this.otherEntites = otherEntites;
+  }
+
+  public isCreated(): boolean {
+    return this.created;
+  }
+
+  private getOtherEntitiesArray(): Entity[] {
+    return Object.values(this.otherEntites);
   }
 
   private createBackground(): void {

@@ -1,5 +1,7 @@
 export interface ServerDataModel {
-  entities: EntityDataModel[];
+  entities: {
+    [name: string]: EntityDataModel;
+  };
 }
 
 export interface EntityDataModel {
