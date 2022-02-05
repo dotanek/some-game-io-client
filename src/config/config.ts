@@ -19,7 +19,7 @@ export default {
     massVelocityCapacity: 100000, // Above this mass, velocity remains constant.
   },
   camera: {
-    entityToViewRatio: 50,
+    entityToViewRatio: 30,
   },
   socket: {
     server: 'http://localhost:5000',
